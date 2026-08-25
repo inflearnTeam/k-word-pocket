@@ -16,16 +16,22 @@ public enum Role {
     private final String userRole;
 
     public static Role of(String role) {
+        if (role == null || role.isBlank()) {
+            return ROLE_USER;
+        }
+
+        String formatted = role.toUpperCase().startsWith("ROLE_")
+                ? role.toUpperCase()
+                : "ROLE_" + role.toUpperCase();
+
         return Arrays.stream(Role.values())
-                .filter(value -> value.name().equalsIgnoreCase(role))
+                .filter(value -> value.name().equals(formatted))
                 .findFirst()
-                .orElseThrow(() -> new RoleNotMatchException());
+                .orElseThrow(RoleNotMatchException::new);
     }
 
     public static class Authority {
         public static final String USER = "ROLE_USER";
         public static final String ADMIN = "ROLE_ADMIN";
     }
-
 }
-

@@ -25,7 +25,7 @@ public class User extends BaseEntity {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Role role = Role.ROLE_USER;
 
     public User(String email, String password, Role role) {
         this.email = email;
