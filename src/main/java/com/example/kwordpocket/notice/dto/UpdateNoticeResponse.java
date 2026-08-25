@@ -1,0 +1,22 @@
+package com.example.kwordpocket.notice.dto;
+
+import com.example.kwordpocket.notice.entity.Notice;
+import java.time.LocalDateTime;
+
+public record UpdateNoticeResponse(
+        Long id,
+        String title,
+        String content,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
+) {
+    public static UpdateNoticeResponse from(Notice notice) {
+        return new UpdateNoticeResponse(
+                notice.getId(),
+                notice.getTitle(),
+                notice.getContent(),
+                notice.getCreatedAt(),
+                notice.getUpdatedAt()
+        );
+    }
+}
