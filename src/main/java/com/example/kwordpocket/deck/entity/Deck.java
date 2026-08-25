@@ -30,4 +30,8 @@ public class Deck extends BaseEntity {
         this.name = name;
         this.user = user;
     }
+
+    public void updateName(String name) {
+        this.name = name;
+    }
 }
