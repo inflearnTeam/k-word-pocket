@@ -1,5 +1,6 @@
 package com.example.kwordpocket.faq.entity;
 
+import com.example.kwordpocket.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -9,11 +10,15 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "faqs")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Faq {
+public class Faq extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, length = 200)
     private String question;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String answer;
 
     public Faq(String question, String answer) {

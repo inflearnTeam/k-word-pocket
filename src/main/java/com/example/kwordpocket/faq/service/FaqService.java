@@ -2,12 +2,13 @@ package com.example.kwordpocket.faq.service;
 
 import com.example.kwordpocket.faq.dto.*;
 import com.example.kwordpocket.faq.entity.Faq;
+import com.example.kwordpocket.faq.exception.FaqNotFoundException;
 import com.example.kwordpocket.faq.repository.FaqRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -16,58 +17,37 @@ public class FaqService {
     private final FaqRepository faqRepository;
 
     @Transactional
-    public FaqCreateResponse createFaq(FaqCreateRequest request) {
+    public FaqResponse createFaq(FaqCreateRequest request) {
         Faq faq = new Faq(request.getQuestion(), request.getAnswer());
-        faqRepository.save(faq);
-        return new FaqCreateResponse(
-                faq.getId(),
-                faq.getQuestion(),
-                faq.getAnswer()
-        );
+        return FaqResponse.from(faqRepository.save(faq));
     }
 
     @Transactional(readOnly = true)
-    public List<FaqGetResponse> getAllFaq() {
-        List<Faq> faqs = faqRepository.findAll();
-        return faqs.stream().map(
-                faq -> new FaqGetResponse(
-                        faq.getId(),
-                        faq.getQuestion(),
-                        faq.getAnswer()
-                )).toList();
+    public Page<FaqResponse> getAllFaq(Pageable pageable) {
+        return faqRepository.findAll(pageable)
+                .map(FaqResponse::from);
     }
 
     @Transactional(readOnly = true)
-    public FaqGetResponse getOneFaq(Long faqId) {
-        Faq faq = faqRepository.findById(faqId).orElseThrow(
-                () -> new FaqNotFoundException("존재하지 않는 Faq 입니다.")
-        );
-        return new FaqGetResponse(
-                faq.getId(),
-                faq.getQuestion(),
-                faq.getAnswer()
-        );
+    public FaqResponse getOneFaq(Long faqId) {
+        return FaqResponse.from(findFaqById(faqId));
     }
 
     @Transactional
-    public FaqUpdateResponse updateFaq(Long faqId, FaqUpdateRequest request) {
-        Faq faq = faqRepository.findById(faqId).orElseThrow(
-                () -> new FaqNotFoundException("존재하지 않는 Faq 입니다.")
-        );
+    public FaqResponse updateFaq(Long faqId, FaqUpdateRequest request) {
+        Faq faq = findFaqById(faqId);
         faq.update(request.getQuestion(), request.getAnswer());
-        return new FaqUpdateResponse(
-                faq.getId(),
-                faq.getQuestion(),
-                faq.getAnswer()
-        );
+        faqRepository.flush();
+        return FaqResponse.from(faq);
     }
 
     @Transactional
     public void deleteFaq(Long faqId) {
-        boolean existence = faqRepository.existsById(faqId);
-        if (!existence) {
-            throw new FaqNotFoundException("존재하지 않는 Faq 입니다.");
-        }
-        faqRepository.deleteById(faqId);
+        faqRepository.delete(findFaqById(faqId));
+    }
+
+    private Faq findFaqById(Long faqId) {
+        return faqRepository.findById(faqId)
+                .orElseThrow(FaqNotFoundException::new);
     }
 }
